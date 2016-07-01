@@ -89,18 +89,18 @@ while ( $line = <$in> ) {
 	
 	$msdsnap /= $natom;
 	
-	print "@dim0 \n";
-	print "@dim \n";
-	print "@{$snap[1]}\n";
-	print "$#snap\n";
-	print "@comcorr \n";
-	print "$msdsnap $natom\n";
-	print "@{$msd[1]}\n";
-	print "@com \n@com0 \n";
+#	print "@dim0 \n";
+#	print "@dim \n";
+#	print "@{$snap[1]}\n";
+#	print "$#snap\n";
+#	print "@comcorr \n";
+#	print "$msdsnap $natom\n";
+#	print "@{$msd[1]}\n";
+#	print "@com \n@com0 \n";
 	
-	printf $out "%i %f", $tstep, $msdsnap;
+	printf $out "%i %.10f\n", $tstep, $msdsnap;
 	
-	die;
+#	die;
 }
 
 
