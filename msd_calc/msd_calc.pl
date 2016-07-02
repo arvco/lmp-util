@@ -45,7 +45,7 @@ my @com0 = determineCOM($snap0,$natom0);
 
 
 # compute msd for all other snapshots
-while ( $line = <$in> ) {
+while ( my $line = <$in> ) {
 	my ($tstep, $natom, $snap, $dim) = readTimestepData($in,$line);
 	
 	my @snap = @$snap;
@@ -59,7 +59,7 @@ while ( $line = <$in> ) {
 	
 	if ($trlcorr == 1) {
 		foreach my $d ( 0 .. $#com ) {
-			push @comcorr, ( $com[$d] - $com0[$d] );
+			push @comcorr, ( $com0[$d] - $com[$d] );
 		}
 	}
 	else {
@@ -71,13 +71,14 @@ while ( $line = <$in> ) {
 	foreach my $i ( 0 .. $#snap ) {
 		my $msdtot = 0;
 		foreach my $j ( 2 .. $#{$snap[$i]} ) {
-			my $msdnow = abs( ($snap[$i][$j] - $comcorr[$j-2] ) * $dim[$j-2] - $snap0[$i][$j]*$dim0[$j-2] );
+			my $msdnow = abs( ($snap[$i][$j] + $comcorr[$j-2] ) * $dim[$j-2] - $snap0[$i][$j]*$dim0[$j-2] );
 			
 			# correct for atoms moving reentering simulation box on the opposite site
 			# due to periodic boundary conditions
 
 			if ( $msdnow > (0.5*$dim[$j-2]) ) {
-				$msdnow -= 1;
+				print "$i $msdnow\n";
+				$msdnow -= $dim[$j-2];
 			}
 			$msdnow *= $msdnow;
 			$msdtot += $msdnow;
