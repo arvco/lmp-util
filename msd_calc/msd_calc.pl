@@ -99,7 +99,7 @@ while ( my $line = <$in> ) {
 #	print "@{$msd[1]}\n";
 #	print "@com \n@com0 \n";
 	
-	printf $out "%i %.10f\n", $tstep, $msdsnap;
+#	printf $out "%i %.10f\n", $tstep, $msdsnap;
 	
 #	die;
 }
@@ -167,6 +167,7 @@ sub readTimestepData {
 	# http://perlmeme.org/faqs/perl_thinking/returning.html
 	return($tstep, $natom, \@snap, \@dim);
 }
+
 
 
 # determine center of mass of the initial snapshot
