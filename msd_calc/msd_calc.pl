@@ -77,7 +77,7 @@ while ( my $line = <$in> ) {
 			# due to periodic boundary conditions
 
 			if ( $msdnow > (0.5*$dim[$j-2]) ) {
-				print "$i $msdnow\n";
+#				print "$i $msdnow\n";
 				$msdnow -= $dim[$j-2];
 			}
 			$msdnow *= $msdnow;
