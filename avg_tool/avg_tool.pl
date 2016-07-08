@@ -130,7 +130,7 @@ print "@{$_}\n" foreach @avg;
 
 # Calculate standard deviation and mean error
 my @stddev = ();
-my @merror = ();
+my @stderror = ();
 foreach my $n ( 0 .. $#filein ) {
 	@{$stddev[$n]} = ( (0) x @{$avg[$n]} );
 	
@@ -145,13 +145,13 @@ foreach my $n ( 0 .. $#filein ) {
 	$stddev[$n][$_] /= $N for 1 .. $#{$stddev[$n]};
 	$stddev[$n][$_] = sqrt($stddev[$n][$_]) for 1 .. $#{$stddev[$n]};
 
-	$merror[$n][0] = $data[$n][$range[1][$n]][0];
-	$merror[$n][$_] = $stddev[$n][$_] / sqrt($N) for 1 .. $#{$stddev[$n]};
+	$stderror[$n][0] = $data[$n][$range[1][$n]][0];
+	$stderror[$n][$_] = $stddev[$n][$_] / sqrt($N) for 1 .. $#{$stddev[$n]};
 }
 print "STDDEV OF AVERAGES\n";
 print "@{$_}\n" foreach @stddev;
-print "MEAN ERROR OF AVERAGES\n";
-print "@{$_}\n" foreach @merror;
+print "STD ERROR OF THE MEAN OF AVERAGES\n";
+print "@{$_}\n" foreach @stderror;
 
 
 # Print output files
@@ -163,8 +163,8 @@ if ( $#fileout == 0 ) {
 		print $out "$filein[$n]\n";
 		print $out "AVERAGE RANGE\n";
 		printf $out "%i %i\n", $range[0], $range[1][$n];
-		print $out "COL AVG STDDEV MERROR\n";
-		printf $out "%i %.10f %.10f %.10f\n", ($_, $avg[$n][$_], $stddev[$n][$_], $merror[$n][$_] ) for 1 ..  $#{$avg[$n]};
+		print $out "COL AVG STDDEV STDERROR\n";
+		printf $out "%i %.10f %.10f %.10f\n", ($_, $avg[$n][$_], $stddev[$n][$_], $stderror[$n][$_] ) for 1 ..  $#{$avg[$n]};
 		print $out "\n";
 	}
 #	printf $out "%i %.10f\n", $tstep, $msdsnap;
