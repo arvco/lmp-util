@@ -92,8 +92,21 @@ if ( $range[1] == 0 ) {
 	foreach my $n ( 0 .. $#filein ) {
 		$range[1][$n] = $#{$data[$n]};
 	}
+	print "$range[0] @{$range[1]}\n";
 }
-print "$range[0] @{$range[1]}\n";
+else {
+	my $setrange = $range[1];
+	$range[1] = ();
+	foreach my $n ( 0 .. $#filein ) {
+		if ( $setrange <= $#{$data[$n]} ) {
+			$range[1][$n] = $setrange;
+		}
+		else {
+			$range[1][$n] = $#{$data[$n]};
+		}
+	}
+	print "$range[0] @{$range[1]}\n";
+}
 
 
 # Calculate averages
