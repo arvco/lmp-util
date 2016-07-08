@@ -105,7 +105,8 @@ else {
 			$range[1][$n] = $#{$data[$n]};
 		}
 	}
-	print "$range[0] @{$range[1]}\n";
+	print "RANGE: START ENDFILE1 ENDFILE 2 ..\n"
+	print "$range[0] @{$range[1]}\n\n";
 }
 
 
@@ -124,7 +125,7 @@ foreach my $n ( 0 .. $#filein ) {
 	$avg[$n][0] = $data[$n][$range[1][$n]][0];
 	$avg[$n][$_] /= $N for 1 .. $#{$avg[$n]};
 }
-print "AVERAGES OF INPUT FILES\n";
+print "MEANS OF COLUMNS OF INPUT FILES\n";
 print "@{$_}\n" foreach @avg;
 
 
@@ -150,7 +151,7 @@ foreach my $n ( 0 .. $#filein ) {
 }
 print "STDDEV OF AVERAGES\n";
 print "@{$_}\n" foreach @stddev;
-print "STD ERROR OF THE MEAN OF AVERAGES\n";
+print "STD ERROR OF THE MEAN\n";
 print "@{$_}\n" foreach @stderror;
 
 
