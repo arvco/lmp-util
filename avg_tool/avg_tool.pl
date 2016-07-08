@@ -105,7 +105,7 @@ else {
 			$range[1][$n] = $#{$data[$n]};
 		}
 	}
-	print "RANGE: START ENDFILE1 ENDFILE 2 ..\n"
+	print "RANGE: START ENDFILE1 ENDFILE 2 ..\n";
 	print "$range[0] @{$range[1]}\n\n";
 }
 
