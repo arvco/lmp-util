@@ -27,10 +27,12 @@ foreach my $i ( 0 .. $#ARGV ) {
 	}
 	if ( $ARGV[$i] =~ /-out/ ) {
 		($setin, $setout, $setrange) = (0, 1, 0);
+		@fileout = ();
 		next;
 	}
 	if ( $ARGV[$i] =~ /-range/ ) {
 		($setin, $setout, $setrange) = (0, 0, 1);
+		@range = ();
 		next;
 	}
 	
