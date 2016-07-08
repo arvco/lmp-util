@@ -26,7 +26,6 @@ foreach my $i ( 0 .. $#ARGV ) {
 		next;
 	}
 	if ( $ARGV[$i] =~ /-out/ ) {
-		print "output specified\n";
 		($setin, $setout, $setrange) = (0, 1, 0);
 		next;
 	}
@@ -49,9 +48,9 @@ foreach my $i ( 0 .. $#ARGV ) {
 		next;
 	}
 }
-print "INPUT FILES: @filein \n";
-print "OUTPUT FILES: @fileout \n";
-print "RANGE FOR AVG: @range \n";
+print "\nINPUT FILES: @filein \n\n";
+print "OUTPUT FILES: @fileout \n\n";
+print "RANGE FOR AVG: @range \n\n";
 
 
 # Read all input data & Calculate average
