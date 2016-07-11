@@ -30,6 +30,8 @@ my @snap0 = @$snap0;
 my @dim0 = @$dim0;
 
 if ( $#ARGV >= 3 ) {
+	print "Use initial structure from file $ARGV[3]";
+	
 	my $structin = $ARGV[3];
 	open my $inst, '<', $structin;
 	
@@ -40,8 +42,10 @@ if ( $#ARGV >= 3 ) {
 	@dim0 = @$dim0;
 }
 
+
 # determine center of mass of the crystal structure
 my @com0 = determineCOM($snap0,$natom0);
+print "@com0\n";
 
 
 # compute msd for all other snapshots
@@ -55,11 +59,28 @@ while ( my $line = <$in> ) {
 	my $msdsnap = 0;
 	my @comcorr = ();
 	
-	my @com = determineCOM($snap,$natom);
 	
+	# correct for atoms reentering simulation box on the opposite site
+	# due to periodic boundary conditions
+	foreach my $i ( 0 .. $#snap ) {
+		foreach my $j ( 2 .. $#{$snap[$i]} ) {
+			my $disp = $snap[$i][$j] - $snap0[$i][$j];
+			if ($disp > 0.5) {
+				$snap[$i][$j] -= 1;
+			}
+			if ($disp < - 0.5) {
+				$snap[$i][$j] += 1;
+			}
+		}
+	}
+	
+	
+	# Calculate necessary center of mass correction
+	my @com = determineCOM($snap,$natom);
 	if ($trlcorr == 1) {
+		print "COM translation correction turned on\n";
 		foreach my $d ( 0 .. $#com ) {
-			push @comcorr, ( $com0[$d] - $com[$d] );
+			push @comcorr, ( $com[$d] - $com0[$d] );
 		}
 	}
 	else {
@@ -67,41 +88,24 @@ while ( my $line = <$in> ) {
 			push @comcorr, 0;
 		}
 	}
-	
+
+
+	# Compute msd
 	foreach my $i ( 0 .. $#snap ) {
 		my $msdtot = 0;
 		foreach my $j ( 2 .. $#{$snap[$i]} ) {
-			my $msdnow = abs( ($snap[$i][$j] + $comcorr[$j-2] ) * $dim[$j-2] - $snap0[$i][$j]*$dim0[$j-2] );
-			
-			# correct for atoms moving reentering simulation box on the opposite site
-			# due to periodic boundary conditions
-
-			if ( $msdnow > (0.5*$dim[$j-2]) ) {
-#				print "$i $msdnow\n";
-				$msdnow -= $dim[$j-2];
-			}
-			$msdnow *= $msdnow;
+			my $msdnow = abs( ( $snap[$i][$j] - $comcorr[$j-2] ) * $dim[$j-2]  - $snap0[$i][$j] * $dim0[$j-2] )**2;
 			$msdtot += $msdnow;
 			push @{$msd[$i]}, ($msdnow);
 		}
 		push @{$msd[$i]}, $msdtot;
 		$msdsnap += $msdtot;
 	}
-	
 	$msdsnap /= $natom;
 	
-#	print "@dim0 \n";
-#	print "@dim \n";
-#	print "@{$snap[1]}\n";
-#	print "$#snap\n";
-#	print "@comcorr \n";
-#	print "$msdsnap $natom\n";
-#	print "@{$msd[1]}\n";
-#	print "@com \n@com0 \n";
-	
+
+	# Ouput time step and msd 
 	printf $out "%i %.10f\n", $tstep, $msdsnap;
-	
-#	die;
 }
 
 
@@ -169,8 +173,7 @@ sub readTimestepData {
 }
 
 
-
-# determine center of mass of the initial snapshot
+# determine center of mass of a given snapshot
 
 sub determineCOM {
 	# first argument contains reference name to array
