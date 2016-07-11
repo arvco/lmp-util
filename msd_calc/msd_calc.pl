@@ -12,9 +12,14 @@ use warnings;
 my $filein = $ARGV[0];
 my $fileout = $ARGV[1];
 
-# turn the center of mass (com) translation correction on (1) or off (0)
+# turn the center of mass (com) translation correction on (1) or off (all other values)
 my $trlcorr = $ARGV[2];
-
+if ( $trlcorr == 1 ) {
+	print "COM translation correction turned on\n";
+}
+else {
+	print "COM translation correction turned off\n";
+}
 
 open my $in, '<', $filein;
 open my $out,'>', $fileout;
@@ -78,7 +83,6 @@ while ( my $line = <$in> ) {
 	# Calculate necessary center of mass correction
 	my @com = determineCOM($snap,$natom);
 	if ($trlcorr == 1) {
-		print "COM translation correction turned on\n";
 		foreach my $d ( 0 .. $#com ) {
 			push @comcorr, ( $com[$d] - $com0[$d] );
 		}
