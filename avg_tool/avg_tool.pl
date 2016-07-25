@@ -10,11 +10,13 @@ use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);
 
-
+# Initialize arrays and set defaults
 my @filein = ();
+my @temp = ();
 my @fileout = ( "avg_tool.out" );
+my @dataout = ( "avg_tool.dat" );
 my @range = (0, 0);
-my ($setin, $setout, $setrange);
+my ($setin, $setout, $setrange, $setdata);
 
 
 # Loop over arguments and place them into arrays for further use
@@ -22,23 +24,31 @@ foreach my $i ( 0 .. $#ARGV ) {
 	
 	# Recognize which settings are to be made
 	if ( $ARGV[$i] =~ /-in/ ) {
-		($setin, $setout, $setrange) = (1, 0, 0);
+		($setin, $setout, $setrange, $setdata) = (1, 0, 0, 0);
 		next;
 	}
 	if ( $ARGV[$i] =~ /-out/ ) {
-		($setin, $setout, $setrange) = (0, 1, 0);
+		($setin, $setout, $setrange, $setdata) = (0, 1, 0, 0);
 		@fileout = ();
 		next;
 	}
 	if ( $ARGV[$i] =~ /-range/ ) {
-		($setin, $setout, $setrange) = (0, 0, 1);
+		($setin, $setout, $setrange, $setdata) = (0, 0, 1, 0);
 		@range = ();
+		next;
+	}
+	if ( $ARGV[$i] =~ /-dat/ ) {
+		($setin, $setout, $setrange, $setdata) = (0, 0, 0, 1);
+		@dataout = ();
 		next;
 	}
 	
 	# set all the calculation parameters
 	if ( $setin == 1 ) {
 		push @filein, $ARGV[$i];
+		my $tmp = `echo $ARGV[$i] | cut -d "/" -f 2 | cut -d " " -f 2`;
+		chomp($tmp);
+		push @temp, $tmp; 
 		next;
 	}
 	if ( $setout == 1 ) {
@@ -47,6 +57,10 @@ foreach my $i ( 0 .. $#ARGV ) {
 	}
 	if ( $setrange == 1 ) {
 		push @range, $ARGV[$i];
+		next;
+	}
+	if ( $setdata == 1 ) {
+		push @dataout, $ARGV[$i];
 		next;
 	}
 }
@@ -109,6 +123,8 @@ else {
 	print "$range[0] @{$range[1]}\n\n";
 }
 
+print "TEMPERATURES: FILE1 FILE2 .. \n";
+print "$_\n" foreach @temp;
 
 # Calculate averages
 my @avg = ();
@@ -179,5 +195,16 @@ else {
 		close($out);
 	}
 }
+
+
+open my $out,'>', $dataout[0];
+
+foreach my $n ( 0 .. $#filein ) {
+	printf $out "%s %.10f %.10f %.10f\n", ($temp[$n], $avg[$n][$_], $stddev[$n][$_], $stderror[$n][$_] ) for 1 ..  $#{$avg[$n]};
+}
+close($out);
+																	#
+
+
 
 
