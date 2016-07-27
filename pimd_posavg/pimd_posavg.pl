@@ -54,8 +54,11 @@ foreach my $file ( @filein ) {
 		
 		$boxdim[$tstep] = [ @dim ];
 		$numatom[$tstep] = $natom;
-		push @tstepsav, $tstep;
-
+		
+		if ( $file =~ /$filein[0]/ ) {
+			push @tstepsav, $tstep;
+		}
+		
 		# Add files together
 		foreach my $i ( 0 .. $#snap ) {
 			foreach my $j ( 0 .. $#{$snap[$i]} ) {
@@ -71,7 +74,6 @@ open my $out, '>', $fileout[0];
 
 my $N = $#filein + 1;
 foreach my $tstep ( @tstepsav ) {
-	print "$tstep\n";
 	print $out "ITEM: TIMESTEP\n";
 	print $out "$tstep\n";
 	print $out "ITEM: NUMBER OF ATOMS\n";
@@ -82,7 +84,7 @@ foreach my $tstep ( @tstepsav ) {
 	print $out "0 $boxdim[$tstep][2]\n";
 	print $out "ITEM: ATOMS id type xs ys zs\n";
 	foreach my $i ( 0 ..  $#{$avg[$tstep]} ) {
-		printf $out "%i %i %f %f %f\n", $avg[$tstep][$i][0]/$N, $avg[$tstep][$i][1]/$N,$avg[$tstep][$i][2]/$N,$avg[$tstep][$i][3]/$N,$avg[$tstep][$i][4]/$N;
+		printf $out "%i %i %1.10f %1.10f %1.10f\n", $avg[$tstep][$i][0]/$N, $avg[$tstep][$i][1]/$N,$avg[$tstep][$i][2]/$N,$avg[$tstep][$i][3]/$N,$avg[$tstep][$i][4]/$N;
 	}
 }
 close($out);
