@@ -35,8 +35,6 @@ foreach my $i ( 0 .. $#ARGV ) {
 		push @fileout, $ARGV[$i];
 		next;
 	}
-	
-	
 }
 
 my @avg = ();
@@ -64,7 +62,6 @@ foreach my $file ( @filein ) {
 				$avg[$tstep][$i][$j] += $snap[$i][$j];
 			}
 		}
-		print "$tstep @{$avg[$tstep][1]}\n";
 	}
 	close ($in);
 }
