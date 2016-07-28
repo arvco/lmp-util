@@ -179,7 +179,7 @@ if ( $#fileout == 0 ) {
 		print $out "FILE\n";
 		print $out "$filein[$n]\n";
 		print $out "AVERAGE RANGE\n";
-		printf $out "%i %i\n", $range[0], $range[1][$n];
+		printf $out "%i %i %i\n", $range[0], $range[1][$n], $range[0];
 		print $out "COL AVG STDDEV STDERROR\n";
 		printf $out "%i %.10f %.10f %.10f\n", ($_, $avg[$n][$_], $stddev[$n][$_], $stderror[$n][$_] ) for 1 ..  $#{$avg[$n]};
 		print $out "\n";
