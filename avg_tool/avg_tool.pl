@@ -9,13 +9,15 @@
 use strict;
 use warnings;
 use Scalar::Util qw(looks_like_number);
+use POSIX;
 
 # Initialize arrays and set defaults
 my @filein = ();
 my @temp = ();
 my @fileout = ( "avg_tool.out" );
 my @dataout = ( "avg_tool.dat" );
-my @range = (0, 0);
+#my @range = (0, 0);
+my @range = (0, 0, 1);
 my ($setin, $setout, $setrange, $setdata);
 
 
@@ -106,41 +108,46 @@ if ( $range[1] == 0 ) {
 	foreach my $n ( 0 .. $#filein ) {
 		$range[1][$n] = $#{$data[$n]};
 	}
-	print "$range[0] @{$range[1]}\n";
 }
 else {
 	my $setrange = $range[1];
 	$range[1] = ();
 	foreach my $n ( 0 .. $#filein ) {
 		if ( $setrange <= $#{$data[$n]} ) {
-			$range[1][$n] = $setrange;
+			$range[1][$n] = $setrange - 1;
 		}
 		else {
 			$range[1][$n] = $#{$data[$n]};
 		}
 	}
-	print "RANGE: START ENDFILE1 ENDFILE 2 ..\n";
-	print "$range[0] @{$range[1]}\n\n";
 }
+
+print "ARRAY RANGE: START EVERYL ENDFILE1 ENDFILE 2 ..\n";
+print "$range[0] $range[2] @{$range[1]}\n\n";
+
 
 print "TEMPERATURES: FILE1 FILE2 .. \n";
 print "$_\n" foreach @temp;
 
 # Calculate averages
 my @avg = ();
+my @N = ();
 foreach my $n ( 0 .. $#filein ) {
 	@{$avg[$n]} = ( (0) x @{$data[$n][0]} );
 	
-	foreach my $line ( $range[0] .. $range[1][$n] ) {
+#	foreach my $line ( $range[0] .. $range[1][$n] ) {
+	for ( my $line = $range[0]; $line <= $range[1][$n]; $line += $range[2] ) {
 		foreach my $col ( 1 .. $#{$data[$n][$line]} ) {
 			$avg[$n][$col] += $data[$n][$line][$col];
 		}
 	}
-	my $N = ($range[1][$n] - $range[0] + 1);
+	$N[$n] = ceil( ($range[1][$n] - $range[0] + 1)/$range[2] );
 
 	$avg[$n][0] = $data[$n][$range[1][$n]][0];
-	$avg[$n][$_] /= $N for 1 .. $#{$avg[$n]};
+	$avg[$n][$_] /= $N[$n] for 1 .. $#{$avg[$n]};
 }
+print "NUMBER OF LINES AVERAGED\n";
+print "$_\n" foreach @N;
 print "MEANS OF COLUMNS OF INPUT FILES\n";
 print "@{$_}\n" foreach @avg;
 
@@ -151,19 +158,20 @@ my @stderror = ();
 foreach my $n ( 0 .. $#filein ) {
 	@{$stddev[$n]} = ( (0) x @{$avg[$n]} );
 	
-	foreach my $line ( $range[0] .. $range[1][$n] ) {
+#	foreach my $line ( $range[0] .. $range[1][$n] ) {
+	for ( my $line = $range[0]; $line <= $range[1][$n]; $line += $range[2] ) {
 		foreach my $col ( 1 .. $#{$data[$n][$line]} ) {
 			$stddev[$n][$col] += ( $data[$n][$line][$col] - $avg[$n][$col] )**2;
 		}
 	}
-	my $N = ($range[1][$n] - $range[0] + 1);
+#	my $N = ceil( ($range[1][$n] - $range[0] + 1)/$range[2] );
 	
 	$stddev[$n][0] = $data[$n][$range[1][$n]][0];
-	$stddev[$n][$_] /= $N for 1 .. $#{$stddev[$n]};
+	$stddev[$n][$_] /= $N[$n] for 1 .. $#{$stddev[$n]};
 	$stddev[$n][$_] = sqrt($stddev[$n][$_]) for 1 .. $#{$stddev[$n]};
 
 	$stderror[$n][0] = $data[$n][$range[1][$n]][0];
-	$stderror[$n][$_] = $stddev[$n][$_] / sqrt($N) for 1 .. $#{$stddev[$n]};
+	$stderror[$n][$_] = $stddev[$n][$_] / sqrt($N[$n]) for 1 .. $#{$stddev[$n]};
 }
 print "STDDEV OF AVERAGES\n";
 print "@{$_}\n" foreach @stddev;
@@ -203,8 +211,5 @@ foreach my $n ( 0 .. $#filein ) {
 	printf $out "%s %.10f %.10f %.10f\n", ($temp[$n], $avg[$n][$_], $stddev[$n][$_], $stderror[$n][$_] ) for 1 ..  $#{$avg[$n]};
 }
 close($out);
-																	#
-
-
 
 
