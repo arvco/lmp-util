@@ -8,6 +8,9 @@
 use strict;
 use warnings;
 
+# Number of lines containing environment information per time step in lammps output
+my $nlmphead = 8;
+
 
 my $filein = $ARGV[0];
 my $fileout = $ARGV[1];
@@ -29,10 +32,11 @@ open my $out,'>', $fileout;
 # input file if not extra file ($ARGV[2]) is specified 
 
 my $line = <$in>;
-my ($tstep0, $natom0, $snap0, $dim0) = readTimestepData($in,$line);
+my ($tstep0, $natom0, $snap0, $dim0, $ixyz0) = readTimestepData($in,$line,$nlmphead);
 
 my @snap0 = @$snap0;
 my @dim0 = @$dim0;
+my @ixyz0 = @$ixyz0;
 
 if ( $#ARGV >= 3 ) {
 	print "Use initial structure from file $ARGV[3]";
@@ -41,10 +45,11 @@ if ( $#ARGV >= 3 ) {
 	open my $inst, '<', $structin;
 	
 	my $line = <$inst>;
-	($tstep0, $natom0, $snap0, $dim0) = readTimestepData($inst,$line);
+	($tstep0, $natom0, $snap0, $dim0, $ixyz0) = readTimestepData($inst,$line,$nlmphead);
 	
 	@snap0 = @$snap0;
 	@dim0 = @$dim0;
+	my @ixyz0 = @$ixyz0;
 }
 
 
@@ -55,10 +60,11 @@ print "@com0\n";
 
 # compute msd for all other snapshots
 while ( my $line = <$in> ) {
-	my ($tstep, $natom, $snap, $dim) = readTimestepData($in,$line);
+	my ($tstep, $natom, $snap, $dim, $ixyz) = readTimestepData($in,$line,$nlmphead);
 	
 	my @snap = @$snap;
 	my @dim = @$dim;
+	my @ixyz = @$ixyz;
 	
 	my @msd = ();
 	my $msdsnap = 0;
@@ -133,11 +139,12 @@ while ( my $line = <$in> ) {
 sub readTimestepData {
 	my $in = $_[0];
 	my $line = $_[1];
+	my $nlmphead = $_[2];
 	
 	chomp($line);
 	my @head = ($line);
 	
-	foreach (1 .. 8) {
+	foreach (1 .. $nlmphead) {
 		$line = <$in>;
 		chomp($line);
 		push @head, $line;
@@ -150,10 +157,25 @@ sub readTimestepData {
 	# arrays for unit cell dimensions, atom data and temporary auxiliary purposes
 	my @dim	= ();
 	my @snap = ();
-	my @tmp = ();
 	my %data;
 	
-	foreach my $i ( 5 .. 7 ) {
+	my @ixyz = ();
+	
+	my @tmp = split ' ', $head[$nlmphead];
+	
+	foreach my $i ( 0 .. $#tmp ) {
+		if ( $tmp[$i] =~ /xs/ ) {
+			$ixyz[0] = $i;
+		}
+		if ( $tmp[$i] =~ /ys/ ) {
+			$ixyz[1] = $i;
+		}
+		if ( $tmp[$i] =~ /zs/ ) {
+			$ixyz[2] = $i;
+		}
+	}
+	
+	foreach my $i ( ($nlmphead-3) .. ($nlmphead-1) ) {
 		@tmp = split ' ', $head[$i];
 		push @dim, ( $tmp[1] - $tmp[0] );
 	}
@@ -173,7 +195,7 @@ sub readTimestepData {
 	
 	# \@ creates a reference to the array -> see:
 	# http://perlmeme.org/faqs/perl_thinking/returning.html
-	return($tstep, $natom, \@snap, \@dim);
+	return($tstep, $natom, \@snap, \@dim, \@ixyz);
 }
 
 
@@ -185,11 +207,11 @@ sub determineCOM {
 	my $natom = $_[1];
 	
 	my @snap = @$snap;
-
+	
 	my $comx;
 	my $comy;
 	my $comz;
-
+	
 	foreach my $id ( 0 .. $#snap) {
 		$comx += $snap[$id][2];
 		$comy += $snap[$id][3];
@@ -199,7 +221,7 @@ sub determineCOM {
 	$comy /= $natom;
 	$comz /= $natom;
 	my @com = ($comx, $comy, $comz);
-
+	
 	return (@com);
 }
 
