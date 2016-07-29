@@ -84,7 +84,7 @@ foreach my $tstep ( @tstepsav ) {
 	print $out "0 $boxdim[$tstep][2]\n";
 	print $out "ITEM: ATOMS id type xs ys zs\n";
 	foreach my $i ( 0 ..  $#{$avg[$tstep]} ) {
-		printf $out "%i %i %1.10f %1.10f %1.10f\n", $avg[$tstep][$i][0]/$N, $avg[$tstep][$i][1]/$N,$avg[$tstep][$i][2]/$N,$avg[$tstep][$i][3]/$N,$avg[$tstep][$i][4]/$N;
+		printf $out "%i %i %1.10f %1.10f %1.10f\n", $avg[$tstep][$i][0]/$N, $avg[$tstep][$i][1]/$N, $avg[$tstep][$i][2]/$N, $avg[$tstep][$i][3]/$N, $avg[$tstep][$i][4]/$N;
 	}
 }
 close($out);
