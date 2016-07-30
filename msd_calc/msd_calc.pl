@@ -32,8 +32,9 @@ open my $out,'>', $fileout;
 # input file if not extra file ($ARGV[2]) is specified 
 
 my $line = <$in>;
-my ($tstep0, $natom0, $snap0, $dim0, $ixyz0) = readTimestepData($in,$line,$nlmphead);
+my ($tstep0, $natom0, $coord0, $snap0, $dim0, $ixyz0) = readTimestepData($in,$line,$nlmphead);
 
+my @coord0 = @$coord0;
 my @snap0 = @$snap0;
 my @dim0 = @$dim0;
 my @ixyz0 = @$ixyz0;
@@ -45,25 +46,29 @@ if ( $#ARGV >= 3 ) {
 	open my $inst, '<', $structin;
 	
 	my $line = <$inst>;
-	($tstep0, $natom0, $snap0, $dim0, $ixyz0) = readTimestepData($inst,$line,$nlmphead);
+	($tstep0, $natom0, $coord0, $snap0, $dim0, $ixyz0) = readTimestepData($inst,$line,$nlmphead);
 	
+	@coord0 = @$coord0;
 	@snap0 = @$snap0;
 	@dim0 = @$dim0;
-	my @ixyz0 = @$ixyz0;
+	@ixyz0 = @$ixyz0;
 }
 
 
 # determine center of mass of the crystal structure
-my @com0 = determineCOM($snap0,$natom0);
-print "@com0\n";
+my @com0 = determineCOM($snap0,$natom0,$ixyz0);
+print "CENTRE OF MASS: @com0\n";
+print "COORDINATES: @coord0\n";
 
 
 # compute msd for all other snapshots
 while ( my $line = <$in> ) {
-	my ($tstep, $natom, $snap, $dim, $ixyz) = readTimestepData($in,$line,$nlmphead);
+	my ($tstep, $natom, $coord, $snap, $dim, $ixyz) = readTimestepData($in,$line,$nlmphead);
 	
+	my @coord = @$coord;
 	my @snap = @$snap;
 	my @dim = @$dim;
+	
 	my @ixyz = @$ixyz;
 	
 	my @msd = ();
@@ -74,7 +79,9 @@ while ( my $line = <$in> ) {
 	# correct for atoms reentering simulation box on the opposite site
 	# due to periodic boundary conditions
 	foreach my $i ( 0 .. $#snap ) {
-		foreach my $j ( 2 .. $#{$snap[$i]} ) {
+		foreach my $j ( $ixyz[0] .. $ixyz[2] ) {
+#			print "$i $j $snap[$i][$j]\n";
+#			print "$j @{$snap[$i]}\n";
 			my $disp = $snap[$i][$j] - $snap0[$i][$j];
 			if ($disp > 0.5) {
 				$snap[$i][$j] -= 1;
@@ -87,7 +94,7 @@ while ( my $line = <$in> ) {
 	
 	
 	# Calculate necessary center of mass correction
-	my @com = determineCOM($snap,$natom);
+	my @com = determineCOM($snap,$natom,$ixyz);
 	if ($trlcorr == 1) {
 		foreach my $d ( 0 .. $#com ) {
 			push @comcorr, ( $com[$d] - $com0[$d] );
@@ -103,8 +110,15 @@ while ( my $line = <$in> ) {
 	# Compute msd
 	foreach my $i ( 0 .. $#snap ) {
 		my $msdtot = 0;
-		foreach my $j ( 2 .. $#{$snap[$i]} ) {
-			my $msdnow = abs( ( $snap[$i][$j] - $comcorr[$j-2] ) * $dim[$j-2]  - $snap0[$i][$j] * $dim0[$j-2] )**2;
+		foreach my $j ( 0 .. $#ixyz ) {
+#		foreach my $j ( 2 .. $#{$snap[$i]} ) {
+			my $msdnow;
+			if ( $coord =~ /F/ ) {
+				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j] ) * $dim[$j]  - $snap0[$i][$ixyz[$j]] * $dim0[$j] )**2;
+			}
+			else {
+				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j-2] ) - $snap0[$i][$ixyz[$j]] )**2;
+			}
 			$msdtot += $msdnow;
 			push @{$msd[$i]}, ($msdnow);
 		}
@@ -160,18 +174,41 @@ sub readTimestepData {
 	my %data;
 	
 	my @ixyz = ();
+	my $id;
+	my @coord;
 	
 	my @tmp = split ' ', $head[$nlmphead];
 	
 	foreach my $i ( 0 .. $#tmp ) {
+		if ( $tmp[$i] =~ /id/ ) {
+			$id = $i;
+		}
+	}
+	
+	foreach my $i ( 0 .. $#tmp ) {
 		if ( $tmp[$i] =~ /xs/ ) {
-			$ixyz[0] = $i;
+			$ixyz[0] = $i - $id;
+			$coord[0] = "F";
+		}
+		if ( $tmp[$i] =~ /x/ ) {
+			$ixyz[0] = $i - $id;
+			$coord[0] = "R";
 		}
 		if ( $tmp[$i] =~ /ys/ ) {
-			$ixyz[1] = $i;
+			$ixyz[1] = $i - $id;
+			$coord[1] = "F";
+		}
+		if ( $tmp[$i] =~ /y/ ) {
+			$ixyz[1] = $i - $id;
+			$coord[1] = "R";
 		}
 		if ( $tmp[$i] =~ /zs/ ) {
-			$ixyz[2] = $i;
+			$ixyz[2] = $i - $id;
+			$coord[2] = "F";
+		}
+		if ( $tmp[$i] =~ /z/ ) {
+			$ixyz[2] = $i - $id;
+			$coord[2] = "R";
 		}
 	}
 	
@@ -195,7 +232,7 @@ sub readTimestepData {
 	
 	# \@ creates a reference to the array -> see:
 	# http://perlmeme.org/faqs/perl_thinking/returning.html
-	return($tstep, $natom, \@snap, \@dim, \@ixyz);
+	return($tstep, $natom, \@coord, \@snap, \@dim, \@ixyz);
 }
 
 
@@ -205,17 +242,19 @@ sub determineCOM {
 	# first argument contains reference name to array
 	my $snap = $_[0];
 	my $natom = $_[1];
+	my $ixyz = $_[2];
 	
 	my @snap = @$snap;
+	my @ixyz = @$ixyz;
 	
 	my $comx;
 	my $comy;
 	my $comz;
 	
 	foreach my $id ( 0 .. $#snap) {
-		$comx += $snap[$id][2];
-		$comy += $snap[$id][3];
-		$comz += $snap[$id][4];
+		$comx += $snap[$id][$ixyz[0]];
+		$comy += $snap[$id][$ixyz[1]];
+		$comz += $snap[$id][$ixyz[2]];
 	}
 	$comx /= $natom;
 	$comy /= $natom;
