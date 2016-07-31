@@ -71,7 +71,7 @@ print "OUTPUT FILES: @fileout \n\n";
 print "RANGE FOR AVG: @range \n\n";
 
 
-# Read all input data & Calculate average
+# Read all input data & Calculate average & median
 my @data;
 my @text;
 foreach my $n ( 0 .. $#filein ) {
@@ -83,6 +83,7 @@ foreach my $n ( 0 .. $#filein ) {
 		chomp($line);
 		@tmp = split ' ', $line;
 		
+		# Recognizes whether line contains text or numerical data
 		foreach my $i ( 0 .. $#tmp ) {
 			if ( looks_like_number($tmp[$i]) ) {
 				$isnum += 1;
@@ -134,6 +135,7 @@ my @avg = ();
 my @N = ();
 foreach my $n ( 0 .. $#filein ) {
 	@{$avg[$n]} = ( (0) x @{$data[$n][0]} );
+	@{$median[$n]} = ( (0) x @{$data[$n][0]} );
 	
 #	foreach my $line ( $range[0] .. $range[1][$n] ) {
 	for ( my $line = $range[0]; $line <= $range[1][$n]; $line += $range[2] ) {
@@ -152,16 +154,27 @@ print "MEANS OF COLUMNS OF INPUT FILES\n";
 print "@{$_}\n" foreach @avg;
 
 
-# Calculate standard deviation and mean error
+# Calculate standard deviation and mean error and medians (not yet implemented)
+
 my @stddev = ();
 my @stderror = ();
+my @mediandat = ();
+my @median = ();
 foreach my $n ( 0 .. $#filein ) {
 	@{$stddev[$n]} = ( (0) x @{$avg[$n]} );
-	
+
 #	foreach my $line ( $range[0] .. $range[1][$n] ) {
 	for ( my $line = $range[0]; $line <= $range[1][$n]; $line += $range[2] ) {
 		foreach my $col ( 1 .. $#{$data[$n][$line]} ) {
 			$stddev[$n][$col] += ( $data[$n][$line][$col] - $avg[$n][$col] )**2;
+			
+#			if ( $data[$n][$line][$col] >= $avg[$n][$col] ) {
+#				push @mediandat[$n][$col], $data[$n][$line][$col];
+#			}
+#			else {
+#				shift 
+#			}
+				
 		}
 	}
 #	my $N = ceil( ($range[1][$n] - $range[0] + 1)/$range[2] );
