@@ -37,6 +37,9 @@ foreach my $i ( 0 .. $#ARGV ) {
 	}
 }
 
+print "INPUT: @filein\n";
+print "OUTPUT: @fileout\n";
+
 my @avg = ();
 my @boxdim = ();
 my @numatom = ();
@@ -52,6 +55,8 @@ foreach my $file ( @filein ) {
 		my @snap = @$snap;
 		my @dim = @$dim;
 		
+#		print "$tstep $natom\n";
+
 		$boxdim[$tstep] = [ @dim ];
 		$numatom[$tstep] = $natom;
 		
@@ -67,12 +72,21 @@ foreach my $file ( @filein ) {
 		}
 	}
 	close ($in);
+#	print "$file\n";
+#	print "@{$avg[0][0]}\n";
+#	print "@{$avg[0][1]}\n";
+#	print "@{$avg[0][2]}\n";
+#	print "@{$avg[0][3]}\n";
 }
+
 
 # Output
 open my $out, '>', $fileout[0];
 
 my $N = $#filein + 1;
+
+#print "$N\n";
+
 foreach my $tstep ( @tstepsav ) {
 	print $out "ITEM: TIMESTEP\n";
 	print $out "$tstep\n";
