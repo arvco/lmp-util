@@ -117,7 +117,7 @@ while ( my $line = <$in> ) {
 				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j] ) * $dim[$j]  - $snap0[$i][$ixyz[$j]] * $dim0[$j] )**2;
 			}
 			else {
-				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j-2] ) - $snap0[$i][$ixyz[$j]] )**2;
+				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j] ) - $snap0[$i][$ixyz[$j]] )**2;
 			}
 			$msdtot += $msdnow;
 			push @{$msd[$i]}, ($msdnow);
