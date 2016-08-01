@@ -21,6 +21,7 @@ if ( $trlcorr == 1 ) {
 	print "COM translation correction turned on\n";
 }
 else {
+	$trlcorr = 0;
 	print "COM translation correction turned off\n";
 }
 
