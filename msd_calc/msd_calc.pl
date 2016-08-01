@@ -191,7 +191,7 @@ sub readTimestepData {
 			$ixyz[0] = $i - $id;
 			$coord[0] = "F";
 		}
-		if ( $tmp[$i] =~ /x/ ) {
+		if ( $tmp[$i] =~ /^x$/ ) {
 			$ixyz[0] = $i - $id;
 			$coord[0] = "R";
 		}
@@ -199,7 +199,7 @@ sub readTimestepData {
 			$ixyz[1] = $i - $id;
 			$coord[1] = "F";
 		}
-		if ( $tmp[$i] =~ /y/ ) {
+		if ( $tmp[$i] =~ /^y$/ ) {
 			$ixyz[1] = $i - $id;
 			$coord[1] = "R";
 		}
@@ -207,7 +207,7 @@ sub readTimestepData {
 			$ixyz[2] = $i - $id;
 			$coord[2] = "F";
 		}
-		if ( $tmp[$i] =~ /z/ ) {
+		if ( $tmp[$i] =~ /^z$/ ) {
 			$ixyz[2] = $i - $id;
 			$coord[2] = "R";
 		}
