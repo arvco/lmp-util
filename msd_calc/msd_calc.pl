@@ -114,7 +114,7 @@ while ( my $line = <$in> ) {
 		foreach my $j ( 0 .. $#ixyz ) {
 #		foreach my $j ( 2 .. $#{$snap[$i]} ) {
 			my $msdnow;
-			if ( $coord =~ /F/ ) {
+			if ( $coord[$j] =~ /F/ ) {
 				$msdnow = abs( ( $snap[$i][$ixyz[$j]] - $comcorr[$j] ) * $dim[$j]  - $snap0[$i][$ixyz[$j]] * $dim0[$j] )**2;
 			}
 			else {
