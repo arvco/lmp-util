@@ -25,21 +25,21 @@ my ($setin, $setout, $setrange, $setdata);
 foreach my $i ( 0 .. $#ARGV ) {
 	
 	# Recognize which settings are to be made
-	if ( $ARGV[$i] =~ /-in/ ) {
+	if ( $ARGV[$i] =~ /^-in$/ ) {
 		($setin, $setout, $setrange, $setdata) = (1, 0, 0, 0);
 		next;
 	}
-	if ( $ARGV[$i] =~ /-out/ ) {
+	if ( $ARGV[$i] =~ /^-out$/ ) {
 		($setin, $setout, $setrange, $setdata) = (0, 1, 0, 0);
 		@fileout = ();
 		next;
 	}
-	if ( $ARGV[$i] =~ /-range/ ) {
+	if ( $ARGV[$i] =~ /^-range$/ ) {
 		($setin, $setout, $setrange, $setdata) = (0, 0, 1, 0);
 		@range = ();
 		next;
 	}
-	if ( $ARGV[$i] =~ /-dat/ ) {
+	if ( $ARGV[$i] =~ /^-dat$/ ) {
 		($setin, $setout, $setrange, $setdata) = (0, 0, 0, 1);
 		@dataout = ();
 		next;
