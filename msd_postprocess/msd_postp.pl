@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
 # Reorder Lammps msd output. The input file is expected to the following shape:
-# three row of descriptions;
+# three rows of descriptions;
 # 1 line containing the time step and a number which is equal to the number of
-# rows which contain values which in turn belong to the same time step. Example:
+# rows containing values belonging to the same time step. Example:
 # -------
 # # Time-averaged data for fix msd2
 # # TimeStep Number-of-rows
@@ -14,6 +14,20 @@
 # 3 6.15345e-23
 # 4 6.21113e-23
 # -------
+#
+# The user can specify the values that should be reordered. The values are 
+# thereby converted to %1.10f precision. Example:
+#
+# $ msd_postp.pl $in $out 1 2 3 4
+# 
+# produces
+# -------
+# # Time-averaged data for fix msd2
+# # TimeStep Number-of-rows
+# # Row c_comp2
+# 0	0.0000000000	0.0000000000	0.0000000000	0.0000000000
+# -------
+# 
 
 use strict;
 use warnings;
@@ -21,7 +35,7 @@ use warnings;
 my $filein = $ARGV[0];
 my $fileout = $ARGV[1];
 
-
+# get values to be reordered
 my @ctl = ();
 foreach my $i ( 2 .. $#ARGV ) {
 	push @ctl, $ARGV[$i];
@@ -65,4 +79,3 @@ while ( my $line = <$in> ) {
 	}
 	printf $out "\n";
 }
-
